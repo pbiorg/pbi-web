@@ -1,1 +1,1 @@
-window.API_BASE = 'http://localhost:8080';
+window.API_BASE = 'https://pdi-backend.onrender.com';
