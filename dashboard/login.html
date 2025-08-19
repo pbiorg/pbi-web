@@ -1,0 +1,28 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>PBI — Login</title>
+<script src="config.js"></script>
+<body>
+  <h1>Вход</h1>
+  <form id="loginForm">
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="password" type="password" placeholder="Пароль" required>
+    <button>Войти</button> <span id="st"></span>
+  </form>
+<script>
+async function getCsrf(){
+  const r = await fetch(window.API_BASE + '/api/auth/csrf', { credentials:'include' });
+  const j = await r.json(); return j.csrfToken;
+}
+loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  const csrf = await getCsrf();
+  const r = await fetch(window.API_BASE + '/api/auth/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-csrf-token': csrf},
+    body: JSON.stringify(payload),
+    credentials:'include'
+  });
+  if (r.ok) location.href = '/'; else st.textContent = 'Ошибка входа';
+});
+</script>
+</body></html>

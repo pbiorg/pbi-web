@@ -1,0 +1,44 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>PBI — Users</title>
+<script src="config.js"></script>
+<body>
+  <p><a href="/admin.html">← Назад</a></p>
+  <h1>Пользователи</h1>
+  <table id="t" border="1" cellspacing="0" cellpadding="6">
+    <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Назначить кейсы</th></tr></thead>
+    <tbody></tbody>
+  </table>
+<script>
+async function getCsrf(){
+  const r = await fetch(window.API_BASE + '/api/auth/csrf', { credentials:'include' });
+  return (await r.json()).csrfToken;
+}
+(async ()=>{
+  const r = await fetch(window.API_BASE + '/api/admin/users', { credentials:'include' });
+  if (!r.ok) { alert('Нужны права admin'); return location.href='/login.html'; }
+  const users = await r.json();
+  const tb = document.querySelector('#t tbody');
+  tb.innerHTML = '';
+  for (const u of users){
+    const tr = document.createElement('tr');
+    const tdId = document.createElement('td'); tdId.textContent = u.id;
+    const tdE  = document.createElement('td'); tdE.textContent  = u.email;
+    const tdR  = document.createElement('td'); tdR.textContent  = u.role;
+    const tdC  = document.createElement('td');
+    const input = document.createElement('input'); input.id = 'ids_'+u.id; input.placeholder='PB-25-1031,PB-25-1015';
+    const btn = document.createElement('button'); btn.textContent='Сохранить';
+    btn.addEventListener('click', async ()=>{
+      const val = input.value; const ids = val.split(',').map(s=>s.trim()).filter(Boolean);
+      const csrf = await getCsrf();
+      const rr = await fetch(window.API_BASE + '/api/admin/users/'+u.id+'/cases', {
+        method:'POST', headers:{'Content-Type':'application/json','x-csrf-token': csrf},
+        body: JSON.stringify({ case_ids: ids }), credentials:'include'
+      });
+      alert(rr.ok ? 'OK' : 'Ошибка');
+    });
+    tdC.append(input, ' ', btn);
+    tr.append(tdId, tdE, tdR, tdC);
+    tb.appendChild(tr);
+  }
+})();
+</script>
+</body></html>

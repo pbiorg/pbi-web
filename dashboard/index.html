@@ -1,0 +1,26 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>PBI — Dashboard</title>
+<script src="config.js"></script>
+<body>
+  <p><a href="/login.html">Сменить пользователя</a> | <a href="/admin.html">Админ-панель</a></p>
+  <h1>Мои кейсы</h1>
+  <table id="t" border="1" cellspacing="0" cellpadding="6">
+    <thead><tr><th>ID</th><th>Инцидент</th><th>Статус</th><th>Меры</th></tr></thead>
+    <tbody></tbody>
+  </table>
+<script>
+(async ()=>{
+  const me = await fetch(window.API_BASE + '/api/me', { credentials:'include' });
+  if (me.status === 401) return location.href = '/login.html';
+  const rows = await fetch(window.API_BASE + '/api/me/cases', { credentials:'include' }).then(r=>r.json());
+  const tb = document.querySelector('#t tbody');
+  tb.innerHTML = '';
+  for (const c of rows){
+    const tr = document.createElement('tr');
+    for (const v of [c.id, c.incident, c.status_label, c.measures]){
+      const td = document.createElement('td'); td.textContent = v || ''; tr.appendChild(td);
+    }
+    tb.appendChild(tr);
+  }
+})();
+</script>
+</body></html>

@@ -1,0 +1,42 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<title>PBI — Последние случаи</title>
+<link rel="stylesheet" href="pbi.css">
+<script src="config.js"></script>
+<body>
+  <div class="nav">
+    <a href="index.html"><b>PBI</b></a>
+    <a href="cases.html">Случаи</a>
+    <a href="workflow.html">Как работаем</a>
+    <a href="faq.html">FAQ</a>
+    <div class="right"><a id="loginLink" href="#">Войти</a></div>
+  </div>
+  <div class="container">
+    <h1>Последние 5 случаев</h1>
+    <table><thead><tr><th>ID</th><th>Возраст</th><th>Инцидент</th><th>Регион</th><th>Статус</th><th>Меры</th></tr></thead><tbody id="tb"></tbody></table>
+  </div>
+<script>
+const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
+document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
+
+(async ()=>{
+  try{
+    const r = await fetch(window.API_BASE + '/api/cases', { credentials:'include' });
+    const arr = await r.json();
+    const tb = document.getElementById('tb');
+    tb.innerHTML = '';
+    for (const c of arr){
+      const tr = document.createElement('tr');
+      const cells = [c.id, c.age_group||'', c.incident||'', c.region||'', c.status_label||c.status||'', c.measures||''];
+      for (const v of cells){
+        const td = document.createElement('td');
+        td.textContent = v;
+        tr.appendChild(td);
+      }
+      tb.appendChild(tr);
+    }
+  }catch(e){
+    document.getElementById('tb').innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
+  }
+})();
+</script>
+</body></html>

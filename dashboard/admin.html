@@ -1,0 +1,31 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><title>PBI — Admin</title>
+<script src="config.js"></script>
+<body>
+  <p><a href="/">← К кейсам</a> | <a href="/users.html">Пользователи</a></p>
+  <h1>Создать пользователя</h1>
+  <form id="f">
+    <input name="email" placeholder="email" required>
+    <input name="password" placeholder="пароль" required>
+    <select name="role"><option value="staff">staff</option><option value="admin">admin</option></select>
+    <input name="allowed_cases" placeholder="PB-25-1031,PB-25-1015">
+    <button>Создать</button> <span id="st"></span>
+  </form>
+<script>
+async function getCsrf(){
+  const r = await fetch(window.API_BASE + '/api/auth/csrf', { credentials:'include' });
+  return (await r.json()).csrfToken;
+}
+f.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(f).entries());
+  const allowed = (d.allowed_cases||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const csrf = await getCsrf();
+  const r = await fetch(window.API_BASE + '/api/admin/users', {
+    method:'POST', headers:{'Content-Type':'application/json','x-csrf-token': csrf},
+    body: JSON.stringify({ email:d.email, password:d.password, role:d.role, allowed_cases:allowed }),
+    credentials:'include'
+  });
+  st.textContent = r.ok ? 'Создан' : 'Ошибка (права/валидация)';
+});
+</script>
+</body></html>

@@ -1,0 +1,57 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<title>PBI — Программа Безопасности Интернета</title>
+<link rel="stylesheet" href="pbi.css">
+<script src="config.js"></script>
+<body>
+  <div class="nav">
+    <a href="index.html"><b>PBI</b></a>
+    <a href="cases.html">Случаи</a>
+    <a href="workflow.html">Как работаем</a>
+    <a href="faq.html">FAQ</a>
+    <div class="right"><a id="loginLink" href="#">Войти</a></div>
+  </div>
+  <div class="container">
+    <h1>Сообщить о нарушении</h1>
+    <form id="reportForm">
+      <label>Ваше имя<input name="name" required></label>
+      <label>Email<input name="email" type="email" required></label>
+      <label>Вы —
+        <select name="role" required>
+          <option>Родитель / опекун</option>
+          <option>Провайдер / организация</option>
+          <option>Иное</option>
+        </select>
+      </label>
+      <label>Срочность
+        <select name="urgency">
+          <option>Нормальная</option>
+          <option>Высокая</option>
+        </select>
+      </label>
+      <label>Описание проблемы
+        <textarea name="details" rows="5" required></textarea>
+      </label>
+      <button class="btn">Отправить</button>
+      <span id="st"></span>
+    </form>
+  </div>
+<script>
+const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
+document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
+
+const form = document.getElementById('reportForm');
+form.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const st = document.getElementById('st');
+  const data = Object.fromEntries(new FormData(form).entries());
+  try{
+    const r = await fetch(window.API_BASE + '/api/reports', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data), credentials:'include'
+    });
+    st.textContent = r.ok ? 'Сообщение принято' : 'Ошибка';
+    if(r.ok) form.reset();
+  }catch{ st.textContent='Сеть недоступна'; }
+});
+</script>
+</body></html>
