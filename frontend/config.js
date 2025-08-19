@@ -1,2 +1,2 @@
-window.API_BASE = 'http://localhost:8080';
-window.DASHBOARD_URL = '';
+window.API_BASE = 'https://pdi-backend.onrender.com';
+window.DASHBOARD_URL = '/dashboard'; // логин/кабинет будут на этом пут
