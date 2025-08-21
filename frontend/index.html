@@ -1,57 +1,433 @@
-<!doctype html><html lang="ru"><meta charset="utf-8">
-<title>PBI — Программа Безопасности Интернета</title>
-<link rel="stylesheet" href="pbi.css">
-<script src="config.js"></script>
-<body>
-  <div class="nav">
-    <a href="index.html"><b>PBI</b></a>
-    <a href="cases.html">Случаи</a>
-    <a href="workflow.html">Как работаем</a>
-    <a href="faq.html">FAQ</a>
-    <div class="right"><a id="loginLink" href="#">Войти</a></div>
-  </div>
-  <div class="container">
-    <h1>Сообщить о нарушении</h1>
-    <form id="reportForm">
-      <label>Ваше имя<input name="name" required></label>
-      <label>Email<input name="email" type="email" required></label>
-      <label>Вы —
-        <select name="role" required>
-          <option>Родитель / опекун</option>
-          <option>Провайдер / организация</option>
-          <option>Иное</option>
-        </select>
-      </label>
-      <label>Срочность
-        <select name="urgency">
-          <option>Нормальная</option>
-          <option>Высокая</option>
-        </select>
-      </label>
-      <label>Описание проблемы
-        <textarea name="details" rows="5" required></textarea>
-      </label>
-      <button class="btn">Отправить</button>
-      <span id="st"></span>
-    </form>
-  </div>
-<script>
-const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
-document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark">
+  <title>ПБИ — Программа Безопасности Интернета</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Serif:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --ink: #0f172a;           /* dark slate */
+      --muted: #475569;         /* slate-600 */
+      --brand: #1e40af;         /* blue-800 */
+      --brand-600:#2563eb;      /* blue-600 */
+      --brand-700:#1d4ed8;      /* blue-700 */
+      --accent: #16a34a;        /* green-600 */
+      --warning: #b45309;       /* amber-700 */
+      --ring: rgba(37, 99, 235, .35);
+      --border: #e2e8f0;        /* slate-200 */
+      --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+      --radius-xl: 16px;
+      --radius-2xl: 24px;
+    }
 
-const form = document.getElementById('reportForm');
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const st = document.getElementById('st');
-  const data = Object.fromEntries(new FormData(form).entries());
-  try{
-    const r = await fetch(window.API_BASE + '/api/reports', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(data), credentials:'include'
+    *{box-sizing:border-box}
+    html,body{margin:0; padding:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji"; color:var(--ink); background:var(--bg);}
+    a{color:var(--brand-600); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Header (gov style) */
+    .topbar{
+      background:linear-gradient(90deg,var(--brand) 0%, var(--brand-700) 60%);
+      color:#fff; font-size:14px;
+      display:flex; align-items:center; justify-content:center; gap:.75rem; padding:.35rem .75rem;
+    }
+    .topbar svg{width:18px;height:18px;flex:none;opacity:.9}
+
+    header.site{
+      position:sticky; top:0; z-index:40; backdrop-filter:saturate(140%) blur(6px);
+      background:rgba(255,255,255,.75); border-bottom:1px solid var(--border);
+    }
+    .container{max-width:1180px; margin:0 auto; padding:0 20px}
+    .nav{display:flex; align-items:center; justify-content:space-between; height:64px}
+
+    .brand{
+      display:flex; align-items:center; gap:.8rem; text-decoration:none; color:inherit; font-weight:700
+    }
+    .brand svg{width:34px;height:34px}
+    .brand span{font-family:"Roboto Serif", ui-serif, Georgia; letter-spacing:.2px}
+
+    .menu{display:flex; gap:1rem; align-items:center}
+    .menu a{font-weight:500; color:var(--muted); padding:.5rem .75rem; border-radius:10px}
+    .menu a:hover{background:#eef2ff; color:var(--brand-700)}
+    .cta{display:inline-flex; align-items:center; gap:.5rem; background:var(--brand-600); color:#fff!important; padding:.55rem .9rem; border-radius:12px; box-shadow:var(--shadow); border:1px solid #1e3a8a}
+    .cta:hover{background:var(--brand-700); text-decoration:none}
+
+    /* Hero */
+    .hero{position:relative; padding:56px 0 32px; overflow:hidden}
+    .hero-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:center}
+    .badge{display:inline-flex; align-items:center; gap:.5rem; padding:.35rem .6rem; border-radius:999px; background:#e0e7ff; color:#1e3a8a; font-weight:600; font-size:12px; border:1px solid #c7d2fe}
+    .h1{font-family:"Roboto Serif", ui-serif, Georgia; font-size:40px; line-height:1.15; margin:.6rem 0 1rem}
+    .lead{font-size:18px; color:var(--muted); max-width:60ch}
+    .hero-card{
+      background:radial-gradient(80% 120% at 100% 0%, #e0f2fe 0%, #fff 50%), var(--surface);
+      border:1px solid var(--border); border-radius:var(--radius-2xl); box-shadow:var(--shadow); padding:20px
+    }
+    .hero-card h3{margin:.2rem 0 .75rem}
+    .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+    .stat{background:#ffffffc7; border:1px solid var(--border); border-radius:14px; padding:14px}
+    .stat b{font-size:22px}
+    .trust{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; align-items:center; color:var(--muted); font-size:13px}
+    .trust .pill{border:1px solid var(--border); border-radius:999px; padding:.35rem .6rem; background:#fff}
+
+    /* Sections */
+    section{padding:42px 0}
+    .section-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow); padding:28px}
+    .section-title{font-size:26px; font-weight:700; margin:0 0 18px}
+    .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+    .kpi{border:1px dashed #cbd5e1; border-radius:14px; padding:16px; background:#fff}
+    .kpi small{color:var(--muted)}
+
+    /* How it works */
+    .steps{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+    .step{background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; position:relative}
+    .step .n{position:absolute; top:12px; right:12px; font-weight:700; color:#94a3b8}
+    .step h4{margin:.2rem 0 .3rem}
+
+    /* Parents */
+    .list{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    .card{background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px}
+
+    /* Report form */
+    .form{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .form .wide{grid-column:1/-1}
+    label{display:block; font-weight:600; margin:4px 0}
+    input, textarea, select{width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:12px; background:#fff; font:inherit}
+    input:focus, textarea:focus, select:focus{outline:none; border-color:var(--brand-600); box-shadow:0 0 0 4px var(--ring)}
+    button.primary{appearance:none; border:1px solid #1e3a8a; background:var(--brand-600); color:#fff; font-weight:700; padding:12px 16px; border-radius:12px}
+    button.primary:hover{background:var(--brand-700)}
+
+    /* Footer */
+    footer{padding:28px 0 48px; color:#64748b}
+    .footer-grid{display:grid; grid-template-columns:2fr 1fr 1fr; gap:16px}
+    .legal{font-size:12px; color:#6b7280}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero-grid{grid-template-columns:1fr;}
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .steps{grid-template-columns:repeat(2,1fr)}
+      .list{grid-template-columns:1fr}
+      .form{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr}
+      .menu{display:none}
+      .menu.open{display:flex; flex-direction:column; position:absolute; top:64px; right:16px; background:#fff; border:1px solid var(--border); border-radius:14px; padding:10px; box-shadow:var(--shadow)}
+      .mobile-btn{display:inline-flex}
+    }
+    @media (min-width:981px){.mobile-btn{display:none}}
+
+    /* Dark mode (prefers-color-scheme) */
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg: #0b1220;
+        --surface:#0f172a;
+        --ink:#e5e7eb;
+        --muted:#cbd5e1;
+        --border:#1f2937;
+        --shadow: 0 10px 30px rgba(0,0,0,.45);
+      }
+      .hero-card{background:radial-gradient(80% 120% at 100% 0%, rgba(2,132,199,.15) 0%, rgba(15,23,42,.8) 60%), var(--surface)}
+      .menu a:hover{background:#0b3aa6; color:#fff}
+      .kpi{border-color:#334155}
+      .step{background:linear-gradient(180deg, rgba(30,64,175,.12), rgba(30,64,175,0) 50%), var(--surface)}
+      .card{background:linear-gradient(180deg, rgba(2,132,199,.10), rgba(2,132,199,0) 50%), var(--surface)}
+    }
+  </style>
+<script src="config.js"></script>
+</head>
+<body>
+  <!-- Government-style identity bar -->
+  <div class="topbar" role="banner">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2l7 4v5c0 5-3.8 9.7-7 11-3.2-1.3-7-6-7-11V6l7-4z"/></svg>
+    <span>Программа Безопасности Интернета • ПБИ</span>
+  </div>
+
+  <header class="site" aria-label="Основная навигация">
+    <div class="container nav">
+      <a class="brand" href="#" aria-label="На главную">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#1e40af"/></linearGradient></defs><path fill="url(#g)" d="M24 4l16 9v10c0 10-8 20-16 22C16 43 8 33 8 23V13l16-9z"/><path fill="#fff" opacity=".9" d="M24 12a10 10 0 100 20 10 10 0 000-20zm-2 6h4v6h6v4h-6v6h-4v-6h-6v-4h6v-6z"/></svg>
+        <span>ПБИ</span>
+      </a>
+      <nav class="menu" id="menu">
+        <a href="#about">О нас</a>
+        <a href="#how">Как это работает</a>
+        <a href="cases.html">Последние случаи</a>
+        <a href="workflow.html">Как мы работаем</a>
+        <a href="faq.html">FAQ</a>
+        <a href="#report">Сообщить</a>
+        <a href="#legal">Право</a>
+        <a class="cta" href="#report">Сообщить о нарушении</a>
+		<div class="right"><a id="loginLink" href="#">Войти</a></div>
+      </nav>
+      <button class="mobile-btn cta" id="burger" aria-controls="menu" aria-expanded="false" aria-label="Открыть меню">Меню</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="badge" aria-label="Статус программы">Официальная инициатива по кибербезопасности</div>
+          <h1 class="h1">Защищаем цифровое будущее: профилактика вреда и поддержка семей</h1>
+          <p class="lead">Мы фиксируем и предотвращаем нарушения со стороны неопытных подростков (взломы камер, домофонов и других подключённых устройств), информируем родителей и взаимодействуем с правоохранительными органами в рамках закона.</p>
+          <div class="trust" aria-label="Марки доверия">
+            <span class="pill" title="Конфиденциальность">GDPR / Закон о данных</span>
+            <span class="pill" title="Доступность">WCAG 2.2 AA</span>
+            <span class="pill" title="Безопасность">ISO/IEC 27001 (подход)</span>
+          </div>
+        </div>
+        <aside class="hero-card" aria-label="Ключевые показатели">
+          <h3>Итоги программы</h3>
+          <div class="stat-row">
+            <div class="stat" role="group" aria-label="Выявленные попытки">
+              <small>Выявленные попытки</small><br>
+              <b id="m1">1 482</b>
+            </div>
+            <div class="stat" role="group" aria-label="Предотвращено случаев">
+              <small>Предотвращено</small><br>
+              <b id="m2">1 121</b>
+            </div>
+            <div class="stat" role="group" aria-label="Сообщений семьям">
+              <small>Оповещены семьи</small><br>
+              <b id="m3">793</b>
+            </div>
+          </div>
+          <p class="legal" style="margin-top:10px">* Данные демонстрационные и обновляются по мере верификации.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section aria-labelledby="kpis">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="kpis" class="section-title">Почему это важно</h2>
+          <div class="kpis" role="list">
+            <div class="kpi" role="listitem"><b>Раннее вмешательство</b><br><small>Снижаем риски эскалации к серьёзным преступлениям.</small></div>
+            <div class="kpi" role="listitem"><b>Защита частной жизни</b><br><small>Работа строго в правовом поле и по принципу минимизации данных.</small></div>
+            <div class="kpi" role="listitem"><b>Поддержка семьи</b><br><small>Поясняем риски, даём рекомендации и материалы для диалога.</small></div>
+            <div class="kpi" role="listitem"><b>Партнёрство</b><br><small>Сотрудничаем с провайдерами и компетентными органами.</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" aria-labelledby="about-title">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="about-title" class="section-title">О программе</h2>
+          <p>ПБИ — это превентивная программа, помогающая сократить ущерб от действий подростков-«скидов» в интернете. Мы фиксируем попытки несанкционированного доступа к IP-камерам, домофонам и иным IoT-устройствам, анализируем уровень угрозы и адресно информируем родителей либо правоохранительные органы, когда это необходимо и правомерно.</p>
+          <p><strong>Наша цель</strong> — не наказание, а профилактика. Мы верим, что своевременный сигнал семье и корректные рекомендации могут изменить траекторию подростка и защитить общество.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="how-title" class="section-title">Как это работает</h2>
+          <div class="steps">
+            <div class="step"><span class="n">1</span><h4>Выявление</h4><p>Мониторинг, фиксация следов нарушения и первичная атрибуция.</p></div>
+            <div class="step"><span class="n">2</span><h4>Анализ</h4><p>Оценка риска и потенциального ущерба. Проверка законности обработки.</p></div>
+            <div class="step"><span class="n">3</span><h4>Оповещение</h4><p>Информирование родителей/опекунов или взаимодействие с органами — строго по процедурам.</p></div>
+            <div class="step"><span class="n">4</span><h4>Профилактика</h4><p>Рекомендации семье, учебные материалы и последующий контроль.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parents -->
+    <section id="parents" aria-labelledby="parents-title">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="parents-title" class="section-title">Родителям и опекунам</h2>
+          <div class="list">
+            <div class="card"><b>Ранние признаки</b><p>Необычный интерес к камерам/домофонам, словари взлома, запуск сканеров, сокрытие экранов.</p></div>
+            <div class="card"><b>Домашняя безопасность</b><p>Сильные пароли, двухфакторная аутентификация, обновления прошивок, сегментация Wi‑Fi.</p></div>
+            <div class="card"><b>Диалог и обучение</b><p>Перевод интереса в этичный пентест и соревнования CTF, курсы по кибербезопасности.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report form -->
+    <section id="report" aria-labelledby="report-title">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="report-title" class="section-title">Сообщить о нарушении</h2>
+          <form class="form" id="reportForm" novalidate>
+            <div>
+              <label for="name">Ваше имя</label>
+              <input id="name" name="name" autocomplete="name" required placeholder="Иван Иванов" />
+            </div>
+            <div>
+              <label for="email">Email для связи</label>
+              <input id="email" name="email" type="email" autocomplete="email" required placeholder="name@example.org" />
+            </div>
+            <div>
+              <label for="role">Вы —</label>
+              <select id="role" name="role" required>
+                <option value="" selected disabled>Выберите вариант</option>
+                <option>Родитель / опекун</option>
+                <option>Провайдер / организация</option>
+                <option>Иное</option>
+              </select>
+            </div>
+            <div>
+              <label for="urgency">Срочность</label>
+              <select id="urgency" name="urgency">
+                <option>Нормальная</option>
+                <option>Высокая</option>
+              </select>
+            </div>
+            <div class="wide">
+              <label for="details">Описание проблемы</label>
+              <textarea id="details" name="details" rows="5" required placeholder="Кратко опишите ситуацию, устройства, даты и известные детали…"></textarea>
+            </div>
+            <div class="wide" style="display:flex; align-items:center; gap:.6rem">
+              <input type="checkbox" id="consent" required>
+              <label for="consent" style="margin:0; font-weight:500">Согласен(на) с обработкой данных для целей предотвращения ущерба и связи со мной</label>
+            </div>
+            <div class="wide" style="display:flex; gap:10px; align-items:center">
+              <button class="primary" type="submit">Отправить сообщение</button>
+              <span id="formStatus" role="status" aria-live="polite" style="font-size:14px; color:var(--muted)"></span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Legal -->
+    <section id="legal" aria-labelledby="legal-title">
+      <div class="container">
+        <div class="section-card">
+          <h2 id="legal-title" class="section-title">Правовые основания и принципы</h2>
+          <ul>
+            <li><b>Законность и необходимость.</b> Обработка сведений ведётся только при наличии правового основания и в минимальном объёме.</li>
+            <li><b>Прозрачность.</b> По запросу предоставляем информацию о целях и категориях данных.</li>
+            <li><b>Безопасность.</b> Хранение и передача сведений защищены организационно‑техническими мерами.</li>
+            <li><b>Права субъектов.</b> Учитываем запросы на доступ/исправление/удаление данных в рамках закона.</li>
+          </ul>
+          <p class="legal">ПБИ не поощряет и не совершает несанкционированный доступ. Деятельность направлена на предотвращение ущерба и просвещение несовершеннолетних и их семей.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="brand" aria-label="ПБИ">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#1e40af"/></linearGradient></defs><path fill="url(#g2)" d="M24 4l16 9v10c0 10-8 20-16 22C16 43 8 33 8 23V13l16-9z"/></svg>
+          <span>Программа Безопасности Интернета</span>
+        </div>
+        <p class="legal">© <span id="year"></span> ПБИ. Все права защищены. Этот сайт носит информационно‑просветительский характер.</p>
+      </div>
+      <div>
+        <b>Разделы</b>
+        <ul style="margin:.5rem 0 0; padding:0; list-style:none; line-height:1.9">
+          <li><a href="#about">О программе</a></li>
+          <li><a href="#how">Как это работает</a></li>
+          <li><a href="#parents">Родителям</a></li>
+          <li><a href="#report">Сообщить</a></li>
+          <li><a href="#legal">Право</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Контакты</b>
+        <ul style="margin:.5rem 0 0; padding:0; list-style:none; line-height:1.9">
+          <li><a href="mailto:contact@pbi.example">contact@pbi.example</a></li>
+          <li><a href="tel:+380000000000">+380 (00) 000‑00‑00</a></li>
+          <li><a href="#report">Форма сообщения</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Minor JS: mobile menu, form mock-submit, counters animation
+    const burger = document.getElementById('burger');
+    const menu = document.getElementById('menu');
+    if (burger) {
+      burger.addEventListener('click', () => {
+        const opened = menu.classList.toggle('open');
+        burger.setAttribute('aria-expanded', opened ? 'true' : 'false');
+      });
+    }
+
+    // Accessibility: trap focus when mobile menu is open (simple)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('open')){
+        menu.classList.remove('open'); burger.setAttribute('aria-expanded','false');
+      }
     });
-    st.textContent = r.ok ? 'Сообщение принято' : 'Ошибка';
-    if(r.ok) form.reset();
-  }catch{ st.textContent='Сеть недоступна'; }
-});
-</script>
-</body></html>
+
+    // Demo counters
+    function animateValue(id, start, end, duration) {
+      const el = document.getElementById(id);
+      if(!el) return; const range = end - start; const startTime = performance.now();
+      function tick(t) {
+        const progress = Math.min((t - startTime) / duration, 1);
+        const value = Math.floor(start + range * progress);
+        el.textContent = value.toLocaleString('ru-RU');
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    animateValue('m1', 0, 1482, 900);
+    animateValue('m2', 0, 1121, 1100);
+    animateValue('m3', 0, 793, 1000);
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Form mock
+    const form = document.getElementById('reportForm');
+    const statusEl = document.getElementById('formStatus');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        statusEl.textContent = 'Проверьте корректность полей формы';
+        return;
+      }
+      const data = Object.fromEntries(new FormData(form).entries());
+      console.log('Report payload', data);
+      statusEl.textContent = 'Сообщение отправлено. Мы свяжемся с вами по итогам проверки.';
+      form.reset();
+      setTimeout(()=> statusEl.textContent = '', 6000);
+    });
+	
+	const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
+	document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
+
+	(async ()=>{
+	  try{
+		const r = await fetch(window.API_BASE + '/api/cases', { credentials:'include' });
+		const arr = await r.json();
+		const tb = document.getElementById('tb');
+		tb.innerHTML = '';
+		for (const c of arr){
+		  const tr = document.createElement('tr');
+		  const cells = [c.id, c.age_group||'', c.incident||'', c.region||'', c.status_label||c.status||'', c.measures||''];
+		  for (const v of cells){
+			const td = document.createElement('td');
+			td.textContent = v;
+			tr.appendChild(td);
+		  }
+		  tb.appendChild(tr);
+		}
+	  }catch(e){
+		document.getElementById('tb').innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
+	  }
+	})();
+  </script>
+</body>
+</html>
