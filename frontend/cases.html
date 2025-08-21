@@ -1,42 +1,136 @@
-<!doctype html><html lang="ru"><meta charset="utf-8">
-<title>PBI — Последние случаи</title>
-<link rel="stylesheet" href="pbi.css">
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark">
+  <title>ПБИ — Последние случаи</title>
+  <meta name="description" content="Последние проверенные случаи в рамках Программы Безопасности Интернета (ПБИ).">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Serif:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f7f9fc;--surface:#ffffff;--ink:#0f172a;--muted:#475569;--brand:#1e40af;--brand-600:#2563eb;--brand-700:#1d4ed8;--border:#e2e8f0;--shadow:0 10px 30px rgba(2,6,23,.08);--radius-xl:16px}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto;color:var(--ink);background:var(--bg)}
+    a{color:var(--brand-600);text-decoration:none}a:hover{text-decoration:underline}
+    .topbar{background:linear-gradient(90deg,var(--brand) 0%, var(--brand-700) 60%);color:#fff;display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.35rem .75rem;font-size:14px}
+    .topbar svg{width:18px;height:18px;opacity:.9}
+    header{position:sticky;top:0;background:rgba(255,255,255,.75);backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border);z-index:30}
+    .container{max-width:1180px;margin:0 auto;padding:0 20px}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;align-items:center;gap:.6rem;color:inherit;font-weight:700}
+    .brand svg{width:28px;height:28px}
+    main{padding:36px 0}
+    .section{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:22px}
+    h1{font-family:"Roboto Serif",ui-serif,Georgia;font-size:30px;margin:0 0 8px}
+    .note{color:var(--muted);font-size:14px;margin-bottom:18px}
+    .table{width:100%;border-collapse:separate;border-spacing:0}
+    .table th,.table td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left}
+    .table th{font-size:13px;color:#334155;text-transform:uppercase;letter-spacing:.04em}
+    .badge{display:inline-flex;align-items:center;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--border);font-size:12px}
+    .status-ok{background:#ecfdf5;border-color:#a7f3d0}
+    .status-ref{background:#eff6ff;border-color:#bfdbfe}
+    .status-open{background:#fff7ed;border-color:#fed7aa}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:20px}
+    .card{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff}
+    footer{padding:28px 0 48px;color:#64748b}
+    @media(prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#0f172a;--ink:#e5e7eb;--muted:#cbd5e1;--border:#1f2937;--shadow:0 10px 30px rgba(0,0,0,.45)}.card{background:linear-gradient(180deg,rgba(2,132,199,.08),rgba(2,132,199,0) 50%),var(--surface)}}
+  </style>
 <script src="config.js"></script>
+</head>
 <body>
-  <div class="nav">
-    <a href="index.html"><b>PBI</b></a>
-    <a href="cases.html">Случаи</a>
-    <a href="workflow.html">Как работаем</a>
-    <a href="faq.html">FAQ</a>
-    <div class="right"><a id="loginLink" href="#">Войти</a></div>
-  </div>
-  <div class="container">
-    <h1>Последние 5 случаев</h1>
-    <table><thead><tr><th>ID</th><th>Возраст</th><th>Инцидент</th><th>Регион</th><th>Статус</th><th>Меры</th></tr></thead><tbody id="tb"></tbody></table>
-  </div>
-<script>
-const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
-document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
+  <div class="topbar"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l7 4v5c0 5-3.8 9.7-7 11-3.2-1.3-7-6-7-11V6l7-4z"/></svg><span>ПБИ • Последние случаи (анонимизировано)</span></div>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="index.html"><svg viewBox="0 0 24 24"><path fill="#1e40af" d="M12 2l7 4v5c0 5-3.8 9.7-7 11-3.2-1.3-7-6-7-11V6l7-4z"/></svg><span>Назад на главную</span></a>
+      <nav><a href="workflow.html">Как мы работаем</a> · <a href="faq.html">FAQ</a></nav>
+    </div>
+  </header>
+  <main>
+    <div class="container grid">
+      <section class="section">
+        <h1>Последние 5 проверенных случаев</h1>
+        <p class="note">Мы публикуем обезличенные сведения (ID дела, возрастная группа, тип инцидента, принятые меры). Личные данные несовершеннолетних не раскрываются.</p>
+        <table class="table" role="table" aria-label="Последние случаи">
+          <thead><tr><th>ID дела</th><th>Возраст</th><th>Инцидент</th><th>Регион</th><th>Статус</th><th>Меры</th></tr></thead>
+          <tbody id="casesBody">
+            <!-- Fallback static rows if JSON is unavailable -->
+            <tr><td>PB-25-1031</td><td>13–15</td><td>Попытка доступа к IP‑камере</td><td>Центр</td><td><span class="badge status-ok">Профилактика</span></td><td>Уведомлены родители, рекомендации</td></tr>
+            <tr><td>PB-25-1027</td><td>14–16</td><td>Сканирование домофонов</td><td>Север</td><td><span class="badge status-ref">Передано</span></td><td>Материалы направлены в КЦ киберполиции</td></tr>
+            <tr><td>PB-25-1022</td><td>12–14</td><td>Брут‑форс слабых паролей</td><td>Юг</td><td><span class="badge status-ok">Профилактика</span></td><td>Беседа с семьёй, курсы CTF</td></tr>
+            <tr><td>PB-25-1018</td><td>15–17</td><td>Доступ к веб‑панели камеры</td><td>Запад</td><td><span class="badge status-open">В работе</span></td><td>Идёт проверка провайдера</td></tr>
+            <tr><td>PB-25-1015</td><td>13–15</td><td>Распространение списка устройств</td><td>Восток</td><td><span class="badge status-ref">Передано</span></td><td>Уведомление школе, провайдеру</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <aside class="card">
+        <b>Дисклеймер</b>
+        <p style="margin:.6rem 0 0;color:#64748b">Публикация сведений ведётся в образовательных целях и строго в рамках закона. Персональные данные несовершеннолетних и третьих лиц не размещаются.</p>
+      </aside>
+    </div>
+  </main>
+  <footer>
+    <div class="container" style="color:#64748b">© <script>document.write(new Date().getFullYear())</script> ПБИ</div>
+  </footer>
+  <script>
+    // Optional: load from /data/cases.json if present
+    // Expected JSON: [{id:"PB-25-1031", age:"13–15", incident:"Попытка…", region:"Центр", status:"ok|ref|open", measures:"…"}, ...]
+    (async () => {
+      try{
+        const res = await fetch('/data/cases.json', {cache:'no-store'});
+        if(!res.ok) return; 
+        const data = await res.json();
+        if(!Array.isArray(data) || !data.length) return;
+        const tbody = document.getElementById('casesBody');
+        tbody.innerHTML = '';
+        const statusClass = {ok:'status-ok', ref:'status-ref', open:'status-open'};
+        for(const item of data.slice(0,5)){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.id ?? ''}</td>
+            <td>${item.age ?? ''}</td>
+            <td>${item.incident ?? ''}</td>
+            <td>${item.region ?? ''}</td>
+            <td><span class="badge ${statusClass[item.status] || ''}">${item.status_label || ''}</span></td>
+            <td>${item.measures ?? ''}</td>`;
+          tbody.appendChild(tr);
+        }
+      }catch(e){ /* silent fallback */ }
+    })();
+	
+	const DASHBOARD_URL = (window.DASHBOARD_URL || 'https://pbi-dashboard.onrender.com');
+	document.getElementById('loginLink').setAttribute('href', DASHBOARD_URL + '/login.html');
 
-(async ()=>{
-  try{
-    const r = await fetch(window.API_BASE + '/api/cases', { credentials:'include' });
-    const arr = await r.json();
-    const tb = document.getElementById('tb');
-    tb.innerHTML = '';
-    for (const c of arr){
-      const tr = document.createElement('tr');
-      const cells = [c.id, c.age_group||'', c.incident||'', c.region||'', c.status_label||c.status||'', c.measures||''];
-      for (const v of cells){
-        const td = document.createElement('td');
-        td.textContent = v;
-        tr.appendChild(td);
-      }
-      tb.appendChild(tr);
-    }
-  }catch(e){
-    document.getElementById('tb').innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
-  }
-})();
-</script>
-</body></html>
+	(async ()=>{
+	  try{
+		const r = await fetch(window.API_BASE + '/api/cases', { credentials:'include' });
+		const arr = await r.json();
+		const tb = document.getElementById('tb');
+		tb.innerHTML = '';
+		for (const c of arr){
+		  const tr = document.createElement('tr');
+		  const cells = [c.id, c.age_group||'', c.incident||'', c.region||'', c.status_label||c.status||'', c.measures||''];
+		  for (const v of cells){
+			const td = document.createElement('td');
+			td.textContent = v;
+			tr.appendChild(td);
+		  }
+		  tb.appendChild(tr);
+		}
+	  }catch(e){
+		document.getElementById('tb').innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
+	  }
+	})();
+  </script>
+</body>
+</html>
+      </section>
+      <aside class="card">
+        <b>Дисклеймер</b>
+        <p style="margin:.6rem 0 0;color:#64748b">Публикация сведений ведётся в образовательных целях и строго в рамках закона. Персональные данные несовершеннолетних и третьих лиц не размещаются.</p>
+      </aside>
+    </div>
+  </main>
+  <footer>
+    <div class="container" style="color:#64748b">© <script>document.write(new Date().getFullYear())</script> ПБИ</div>
+  </footer>
+</body>
+</html>
